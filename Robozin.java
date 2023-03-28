@@ -7,6 +7,7 @@ import robocode.*;
 /**
  * Robozin - a robot by (your name here)
  */
+import jdk.javadoc.internal.doclets.toolkit.util.Utils;
 public class Robozin extends Robot
 {
 	/**
@@ -23,10 +24,10 @@ public class Robozin extends Robot
 		// Robot main loop
 		while(true) {
 			// Replace the next 4 lines with any behavior you would like
-			ahead(100);
-			turnGunRight(360);
-			back(100);
-			turnGunRight(360);
+ 		   ahead(100); //Go ahead 100 pixels
+		    turnGunRight(360); //scan
+		    back(75); //Go back 75 pixels
+		    turnGunRight(360); //scan
 		}
 	}
 
@@ -35,7 +36,17 @@ public class Robozin extends Robot
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
 		// Replace the next line with any behavior you would like
-		fire(1);
+		double distance = e.getDistance(); //get the distance of the scanned robot
+    if(distance > 800) //this conditions adjust the fire force according the distance of the scanned robot.
+        fire(5);
+    else if(distance > 600 && distance <= 800)
+        fire(4);
+    else if(distance > 400 && distance <= 600)
+        fire(3);
+    else if(distance > 200 && distance <= 400)
+        fire(2);
+    else if(distance < 200)
+        fire(1);
 	}
 
 	/**
@@ -52,6 +63,8 @@ public class Robozin extends Robot
 	 */
 	public void onHitWall(HitWallEvent e) {
 		// Replace the next line with any behavior you would like
-		back(20);
+		double bearing = e.getBearing(); //get the bearing of the wall
+  	  turnRight(-bearing); //This isn't accurate but release your robot.
+	    ahead(100); //The robot goes away from the wall.
 	}	
 }
