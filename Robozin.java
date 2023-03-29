@@ -4,31 +4,32 @@ import robocode.*;
 import robocode.util.*;
 import java.awt.geom.*;
 import java.awt.Color;
+import java.lang.Math;
 
 // API help : https://robocode.sourceforge.io/docs/robocode/robocode/Robot.html
 
 /**
- * Robozin - a robot by (your name here)
+ * Robozin - a robot by (Robozin)
  */
 
 public class Robozin extends AdvancedRobot {
-	// ******************* Variavel da Mira Teorica *********************
-	// private double limit(double value, double min, double max) {
-	// 	return Math.min(max, Math.max(min, value));
-	// }
+	// ******************* Variavel da Mira Trigonometrica *********************
+	private double limit(double value, double min, double max) {
+		return Math.min(max, Math.max(min, value));
+	}
 	// ******************************************************************
-	final double ROBOT_WIDTH = 	getWidth(),ROBOT_HEIGHT = getHeight();
+	static double enemyBulletSpeed = 3;
+	static double direction;
 
 	public void run() {
+
 
 		setColors(Color.red, Color.blue, Color.green); // body,gun,radar
 		setAdjustGunForRobotTurn(true); // Set gun to turn independent of the robot
 		setAdjustRadarForGunTurn(true); // Set radar to turn independent of the gun
-		turnRadarRightRadians(Double.POSITIVE_INFINITY); // search for the enemy
+		turnRadarRightRadians(direction = Double.POSITIVE_INFINITY); // search for the enemy
 		do {
 			// Replace the next 4 lines with any behavior you would like
-			ahead(100); // Go ahead 100 pixels
-			back(75); // Go back 75 pixels
 			// Check for new targets.
 			// Only necessary for Narrow Lock because sometimes our radar is already
 			// pointed at the enemy and our onScannedRobot code doesn't end up telling
@@ -60,16 +61,19 @@ public class Robozin extends AdvancedRobot {
 		// setFire(3.0);
 
 		// ******************* Mira Complicada(Trigonometria) *********************
+		final double ROBOT_WIDTH =getWidth();
+		final double ROBOT_HEIGHT = getHeight();
 		final double FIREPOWER = 2;
 
 		// Variables prefixed with e- refer to enemy, b- refer to bullet and r- refer to robot
 		final double eAbsBearing = getHeadingRadians() + e.getBearingRadians();
-		final double rX = getX(), rY = getY(),
-			bV = Rules.getBulletSpeed(FIREPOWER);
-		final double eX = rX + e.getDistance()*Math.sin(eAbsBearing),
-			eY = rY + e.getDistance()*Math.cos(eAbsBearing),
-			eV = e.getVelocity(),
-			eHd = e.getHeadingRadians();
+		final double rX = getX();
+		final double rY = getY();
+		final double bV = Rules.getBulletSpeed(FIREPOWER);
+		final double eX = rX + e.getDistance()*Math.sin(eAbsBearing);
+		double eY = rY + e.getDistance()*Math.cos(eAbsBearing);
+		double eV = e.getVelocity();
+		double eHd = e.getHeadingRadians();
 		// These constants make calculating the quadratic coefficients below easier
 		final double A = (eX - rX)/bV;
 		final double B = eV/bV*Math.sin(eHd);
@@ -103,18 +107,22 @@ public class Robozin extends AdvancedRobot {
 		// double linearBearing = headOnBearing + Math.asin(e.getVelocity() / Rules.getBulletSpeed(bulletPower) * Math.sin(e.getHeadingRadians() - headOnBearing));
 		// setTurnGunRightRadians(Utils.normalRelativeAngle(linearBearing - getGunHeadingRadians()));
 		// setFire(bulletPower);
+
+
+		// ******************* Movimentação *********************
+		int integer = 30;
+        double absoluteBearing;
+		int antiRam;
+		setTurnRightRadians(Math.cos(absoluteBearing = e.getBearingRadians())); // always perpendicular to the enemy
+		setAhead(direction *= (Math.random() + (antiRam = (100 / (integer = (int)e.getDistance()))) - (0.6 * Math.sqrt(enemyBulletSpeed / integer) + 0.04)));
 	}
 
 	public void onHitByBullet(HitByBulletEvent e) {
-		// Replace the next line with any behavior you would like
-		back(10);
+		enemyBulletSpeed = e.getVelocity();
 
 	}
 
 	public void onHitWall(HitWallEvent e) {
-		// Replace the next line with any behavior you would like
-		double bearing = e.getBearing(); // get the bearing of the wall
-		turnRight(-bearing); // This isn't accurate but release your robot.
-		ahead(100); // The robot goes away from the wall.
+		direction = -direction;
 	}
 }
