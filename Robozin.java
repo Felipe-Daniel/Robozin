@@ -5,11 +5,12 @@ import robocode.util.*;
 import java.awt.geom.*;
 import java.awt.Color;
 import java.lang.Math;
+import java.awt.Graphics2D;
 
 // API help : https://robocode.sourceforge.io/docs/robocode/robocode/Robot.html
 
 /**
- * Robozin - a robot by (Robozin)
+ * Robozin - a robot by (Felipe,Rodrigo,Anderson)
  */
 
 public class Robozin extends AdvancedRobot {
@@ -18,13 +19,16 @@ public class Robozin extends AdvancedRobot {
 		return Math.min(max, Math.max(min, value));
 	}
 	// ******************************************************************
-	static double enemyBulletSpeed = 3;
+	static double enemySpeed = 3;
 	static double direction;
+
+	int scannedX = Integer.MIN_VALUE;
+	int scannedY = Integer.MIN_VALUE;
 
 	public void run() {
 
 
-		setColors(Color.red, Color.blue, Color.green); // body,gun,radar
+		setColors(Color.gray, Color.gray, Color.red); // body,gun,radar
 		setAdjustGunForRobotTurn(true); // Set gun to turn independent of the robot
 		setAdjustRadarForGunTurn(true); // Set radar to turn independent of the gun
 		turnRadarRightRadians(direction = Double.POSITIVE_INFINITY); // search for the enemy
@@ -114,15 +118,38 @@ public class Robozin extends AdvancedRobot {
         double absoluteBearing;
 		int antiRam;
 		setTurnRightRadians(Math.cos(absoluteBearing = e.getBearingRadians())); // always perpendicular to the enemy
-		setAhead(direction *= (Math.random() + (antiRam = (100 / (integer = (int)e.getDistance()))) - (0.6 * Math.sqrt(enemyBulletSpeed / integer) + 0.04)));
+		// Parte 1 rodar em volta oponente e inverter direção quando chegar na parede
+		// setAhead(direction);
+		// Parte 2 explicar movimentos aleatorios
+		// parte 3 explicar antiRam: quando o inimigo tenta te atropelar, o valor estoura, a aleatoriedade para, e o robo se move o mais rapido possivel em apenas uma direção
+		setAhead(direction *= (Math.random() + (antiRam = (100 / (integer = (int)e.getDistance()))) - (0.6 * Math.sqrt(enemySpeed / integer) + 0.04)));
+		
+		
+		// ******************* Graficos *********************
+		double angle = Math.toRadians((getHeading() + e.getBearing()) % 360);
+
+		// Calculate the coordinates of the robot
+		scannedX = (int)(getX() + Math.sin(angle) * e.getDistance());
+		scannedY = (int)(getY() + Math.cos(angle) * e.getDistance());
+		
 	}
 
 	public void onHitByBullet(HitByBulletEvent e) {
-		enemyBulletSpeed = e.getVelocity();
+		enemySpeed = e.getVelocity();
 
 	}
 
 	public void onHitWall(HitWallEvent e) {
 		direction = -direction;
+	}
+
+	public void onPaint(Graphics2D g) {
+		// Set the paint color to a red half transparent color
+		g.setColor(new Color(0xff, 0x00, 0x00, 0x80));
+	
+		// Draw a line from our robot to the scanned robot
+		g.drawLine(scannedX, scannedY, (int)getX(), (int)getY());
+		// Draw a filled square on top of the scanned robot that covers it
+		g.fillRect(scannedX - 20, scannedY - 20, 40, 40);
 	}
 }
