@@ -14,7 +14,7 @@ import java.awt.Graphics2D;
  */
 
 public class Robozin extends AdvancedRobot {
-	// ******************* Variavel da Mira Trigonometrica *********************
+	// ******************* Mira *********************
 	private double limit(double value, double min, double max) {
 		return Math.min(max, Math.max(min, value));
 	}
@@ -28,7 +28,7 @@ public class Robozin extends AdvancedRobot {
 	public void run() {
 
 
-		setColors(Color.gray, Color.gray, Color.red); // body,gun,radar
+		setColors(Color.green, Color.blue, Color.red); // body,gun,radar
 		setAdjustGunForRobotTurn(true); // Set gun to turn independent of the robot
 		setAdjustRadarForGunTurn(true); // Set radar to turn independent of the gun
 		turnRadarRightRadians(direction = Double.POSITIVE_INFINITY); // search for the enemy
@@ -48,6 +48,7 @@ public class Robozin extends AdvancedRobot {
 	 */
 	public void onScannedRobot(ScannedRobotEvent e) {
 		// ******************* Radar *********************
+		// fonte: https://robowiki.net/wiki/Radar
 		double radarTurn =
 				// Absolute bearing to target
 				getHeadingRadians() + e.getBearingRadians()
@@ -56,15 +57,8 @@ public class Robozin extends AdvancedRobot {
 
 		setTurnRadarRightRadians(Utils.normalRelativeAngle(radarTurn));
 
-
-		// ******************* Mira Simples(Pitagoras) *********************
-		// double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
-		// setTurnGunRightRadians(Utils.normalRelativeAngle(absoluteBearing - 
-		// 	getGunHeadingRadians() + (e.getVelocity() * Math.sin(e.getHeadingRadians() - 
-		// 	absoluteBearing) / 13.0)));
-		// setFire(3.0);
-
-		// ******************* Mira Complicada(Trigonometria) *********************
+		// ******************* Mira Trigonometrica *********************
+		// fonte: https://robowiki.net/wiki/Linear_Targeting
 		final double ROBOT_WIDTH =getWidth();
 		final double ROBOT_HEIGHT = getHeight();
 		final double FIREPOWER = 2;
@@ -105,15 +99,9 @@ public class Robozin extends AdvancedRobot {
 				- getGunHeadingRadians()));
 			setFire(FIREPOWER);
 		}
-		// ******************* Mira Teorica *********************
-		// double bulletPower = 3;
-		// double headOnBearing = getHeadingRadians() + e.getBearingRadians();
-		// double linearBearing = headOnBearing + Math.asin(e.getVelocity() / Rules.getBulletSpeed(bulletPower) * Math.sin(e.getHeadingRadians() - headOnBearing));
-		// setTurnGunRightRadians(Utils.normalRelativeAngle(linearBearing - getGunHeadingRadians()));
-		// setFire(bulletPower);
-
 
 		// ******************* Movimentação *********************
+		// inspirado em: https://robowiki.net/wiki/Random_Movement +  https://robowiki.net/wiki/Musashi_Trick
 		int integer = 30;
         double absoluteBearing;
 		int antiRam;
