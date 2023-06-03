@@ -1,0 +1,59 @@
+FUNCTION_BLOCK antiram factor //Definição de bloco (pode haver mais de um bloco por arquivo)
+
+VAR_INPUT				// Definição das variáveis de entrada
+	enemyDistancy : REAL;
+	enemyVelocity : REAL;
+END_VAR
+
+VAR_OUTPUT				// Definir a variável de saída
+	antiram_factor : REAL;		
+END_VAR
+
+/** 
+	input for Fuzzify 'enemyDistance': {'far_away', 'kinda_close' , 'close'} 
+	TODO: review these values, see at robocode docs
+*/
+FUZZIFY enemyDistance	
+	TERM close := trape 0 0 150 300; 
+	TERM kinda_close := trape 175 250 450 600;
+	TERM far_away := trape 475 550 2000 2000;
+END_FUZZIFY
+
+/** 
+	input for Fuzzify 'enemyVelocity': {'fast', 'normal' , 'slow'} 
+	TODO: review these values, see at robocode docs
+*/
+FUZZIFY enemyVelocity
+	TERM slow := trape 0 0 150 300; 
+	TERM normal := trape 175 250 450 600;
+	TERM fast := trape 475 550 2000 2000;
+END_FUZZIFY
+
+/** 
+	 defuzzifier function for 'antiram': {'fast', 'normal' , 'slow'} 
+	TODO: review these values, see at robocode docs
+*/
+
+DEFUZZIFY antiram			
+	TERM low := trape 0.01 0.1 0.5 1.5;
+	TERM normal := trape 1 1.5 2 2.5;
+	TERM high := trape 2 2.5 3 3;
+	METHOD : COG;		// Método 'Centro da gravidade'
+	DEFAULT := 1;		// Valor default 1 (se nenhuma das regras ativar o defuzzifier)
+END_DEFUZZIFY
+
+ULEBLOCK No1
+	AND : MIN;			// É comum utilizar o método MIN para o operador AND, e o método MAX para o operador OR.
+	ACT : MIN;			// Use 'min' activation method
+	ACCU : MAX;			// Use 'max' accumulation method
+
+	RULE 1 : IF enemyDistancy IS close AND NOT enemyVelocity IS slow THEN antiram_factor IS high;
+	//RULE 2 : IF enemyDistancy IS close AND minhaEnergia IS baixa THEN poder IS normal;
+	//RULE 3 : IF enemyDistancy IS kinda_close AND minhaEnergia IS baixa THEN poder IS fraco;
+	//RULE 4 : IF enemyDistancy IS kinda_close AND minhaEnergia IS kinda_close THEN poder IS normal;
+	//RULE 5 : IF enemyDistancy IS kinda_close AND minhaEnergia IS alta AND NOT minhaEnergia IS alta THEN poder IS forte;
+	//RULE 6 : IF enemyDistancy IS far_aways AND minhaEnergia IS alta AND minhaEnergia IS baixa THEN poder IS normal;
+	//RULE 7 : IF enemyDistancy IS far_aways THEN poder IS fraco; 
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
