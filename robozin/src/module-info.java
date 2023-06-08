@@ -1,9 +1,0 @@
-/**
- * 
- */
-/**
- * @author loyol
- *
- */
-module robozin {
-}
