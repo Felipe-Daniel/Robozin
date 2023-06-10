@@ -10,6 +10,7 @@ import robocode.BulletMissedEvent;
 import robocode.HitByBulletEvent;
 import robocode.RoundEndedEvent;
 import robocode.ScannedRobotEvent;
+import robocode.control.events.TurnEndedEvent;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 //import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
@@ -92,9 +93,16 @@ public class Sample extends AdvancedRobot{
 	public void onRoundEnded(RoundEndedEvent event) {
 		// TODO Auto-generated method stub
 		System.out.println("[last round accuracy]: " + bulletController.bulletsHitted/bulletController.bulletsMissed);
+		System.out.println("[last round hits]: " + bulletController.bulletsHitted);
+		System.out.println("[last round misses]: " + bulletController.bulletsMissed);
+		
 		bulletController.bulletsMissed = 0;
 		bulletController.bulletsHitted = 0;
 		bulletController.accuracy = 0;
+	}
+	
+	public void onTurnEnded(TurnEndedEvent event) {
+		System.out.println("[ROUND EVENT]:");
 	}
 	
 }
