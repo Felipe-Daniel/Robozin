@@ -4,19 +4,47 @@ import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 import robocode.util.*;
 import java.awt.geom.*;
+
+import net.sourceforge.jFuzzyLogic.FunctionBlock;
 /** IT USES:  */
 public class BulletController {
 	
 	private AdvancedRobot robot;
+	private FunctionBlock bulletControllerRules;
 	private double oldEnemyHeading;
+	public double bulletsHitted;
+	public double bulletsMissed;
+	public double accuracy;
 	
 	public BulletController(AdvancedRobot rb) {
 		this.robot = rb;
 	}
 
+	
+	public BulletController(AdvancedRobot rb, FunctionBlock bulletControllerRules) {
+		this(rb);
+		this.bulletControllerRules = bulletControllerRules;
+		bulletsHitted = 0;
+		bulletsMissed = 0;
+		accuracy = 0;
+		
+	}
+	
 	public void execute(ScannedRobotEvent enemyRobotEvent) {
-
-		double bulletPower = Math.min(3.0, this.robot.getEnergy());
+		
+		double bulletPower;
+		
+		if(bulletControllerRules == null) {
+			bulletPower = Math.min(3.0, this.robot.getEnergy());
+		} else {
+			bulletControllerRules.setVariable("accuracy_percentage", accuracy);
+			bulletControllerRules.setVariable("my_energy", robot.getEnergy());
+			bulletControllerRules.setVariable("enemy_energy", enemyRobotEvent.getEnergy());
+			bulletControllerRules.setVariable("enemy_distance", enemyRobotEvent.getDistance());
+			bulletControllerRules.evaluate();
+			bulletPower = bulletControllerRules.getVariable("bullet_power").getValue();
+		}
+		
 		double myX = this.robot.getX();
 		double myY = this.robot.getY();
 		double absoluteBearing = this.robot.getHeadingRadians() + enemyRobotEvent.getBearingRadians();
@@ -46,7 +74,11 @@ public class BulletController {
 
 		this.robot.setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - this.robot.getRadarHeadingRadians()));
 		this.robot.setTurnGunRightRadians(Utils.normalRelativeAngle(theta - this.robot.getGunHeadingRadians()));
-		this.robot.fire(3);
+		this.robot.fire(bulletPower);
+		setAccuracy();
 
+	}
+	private void setAccuracy () {
+		accuracy = bulletsHitted/(bulletsHitted+bulletsMissed);
 	}
 }
