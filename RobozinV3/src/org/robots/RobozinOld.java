@@ -1,11 +1,14 @@
 package org.robots;
 
-import robocode.*;
-import robocode.util.*;
-import java.awt.geom.*;
 import java.awt.Color;
-import java.lang.Math;
 import java.awt.Graphics2D;
+
+import robocode.AdvancedRobot;
+import robocode.HitByBulletEvent;
+import robocode.HitWallEvent;
+import robocode.Rules;
+import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
 
 // API help : https://robocode.sourceforge.io/docs/robocode/robocode/Robot.html
 
@@ -25,6 +28,7 @@ public class RobozinOld extends AdvancedRobot {
 	int scannedX = Integer.MIN_VALUE;
 	int scannedY = Integer.MIN_VALUE;
 
+	@Override
 	public void run() {
 
 
@@ -46,6 +50,7 @@ public class RobozinOld extends AdvancedRobot {
 	/**
 	 * onScannedRobot: What to do when you see another robot
 	 */
+	@Override
 	public void onScannedRobot(ScannedRobotEvent e) {
 		// ******************* Radar *********************
 		// fonte: https://robowiki.net/wiki/Radar
@@ -111,30 +116,33 @@ public class RobozinOld extends AdvancedRobot {
 		// Parte 2 explicar movimentos aleatorios
 		// parte 3 explicar antiRam: quando o inimigo tenta te atropelar, o valor estoura, a aleatoriedade para, e o robo se move o mais rapido possivel em apenas uma direção
 		setAhead(direction *= (Math.random() + (antiRam = (100 / (integer = (int)e.getDistance()))) - (0.6 * Math.sqrt(enemySpeed / integer) + 0.04)));
-		
-		
+
+
 		// ******************* Graficos *********************
 		double angle = Math.toRadians((getHeading() + e.getBearing()) % 360);
 
 		// Calculate the coordinates of the robot
 		scannedX = (int)(getX() + Math.sin(angle) * e.getDistance());
 		scannedY = (int)(getY() + Math.cos(angle) * e.getDistance());
-		
+
 	}
 
+	@Override
 	public void onHitByBullet(HitByBulletEvent e) {
 		enemySpeed = e.getVelocity();
 
 	}
 
+	@Override
 	public void onHitWall(HitWallEvent e) {
 		direction = -direction;
 	}
 
+	@Override
 	public void onPaint(Graphics2D g) {
 		// Set the paint color to a red half transparent color
 		g.setColor(new Color(0xff, 0x00, 0x00, 0x80));
-	
+
 		// Draw a line from our robot to the scanned robot
 		g.drawLine(scannedX, scannedY, (int)getX(), (int)getY());
 		// Draw a filled square on top of the scanned robot that covers it

@@ -3,16 +3,17 @@ package org.robots;
 
 
 
-import robocode.AdvancedRobot;
-import robocode.ScannedRobotEvent;
-import robocode.util.Utils;
-
-import org.robots.helpers.WaveBulletExt;
-
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.robots.helpers.WaveBulletExt;
+
+import robocode.AdvancedRobot;
+import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
 
 /**
  *<p>
@@ -33,7 +34,7 @@ public class TestGuessFactor extends AdvancedRobot {
     static final double PI = Math.PI;
 
     // A list to keep track of the waves
-    List<WaveBulletExt> waves = new ArrayList<WaveBulletExt>();
+    List<WaveBulletExt> waves = new ArrayList<>();
 
     // this holds the GuessFactors...
     // Note: this must be odd, so we can get GuessFactor 0 in the middle
@@ -46,7 +47,8 @@ public class TestGuessFactor extends AdvancedRobot {
 
     Point2D centerTarget;
 
-    public void run() {
+    @Override
+	public void run() {
 
         setAdjustRadarForGunTurn(true);
         setAdjustGunForRobotTurn(true);

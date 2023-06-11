@@ -3,6 +3,9 @@ package org.robots.controllers;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+
+import org.robots.helpers.EnemyWave;
+
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import robocode.AdvancedRobot;
 import robocode.Bullet;
@@ -10,7 +13,6 @@ import robocode.BulletHitBulletEvent;
 import robocode.HitByBulletEvent;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
-import org.robots.helpers.EnemyWave;
 
 public class MovementController {
 	// TODO: maybe apply singleton
@@ -29,9 +31,9 @@ public class MovementController {
 
 	public MovementController(AdvancedRobot robot) {
 		this.robot = robot;
-		_enemyWaves = new ArrayList<EnemyWave>();
-		_surfDirections = new ArrayList<Integer>();
-		_surfAbsBearings = new ArrayList<Double>();
+		_enemyWaves = new ArrayList<>();
+		_surfDirections = new ArrayList<>();
+		_surfAbsBearings = new ArrayList<>();
 		enemyEnergy = 100.0;
 	}
 
@@ -70,29 +72,32 @@ public class MovementController {
 	}
 
 	public void execute(ScannedRobotEvent enemyEvent) {
-		_myLocation = new Point2D.Double(robot.getX(), robot.getY());
-
+		// TODO: apply the fuzzy logic to get the bullet power
+		double bulletPower = enemyEnergy - enemyEvent.getEnergy();
+		double enemyDistance = enemyEvent.getDistance();
 		double lateralVelocity = robot.getVelocity() * Math.sin(enemyEvent.getBearingRadians());
 		double absBearing = enemyEvent.getBearingRadians() + robot.getHeadingRadians();
+		_myLocation = new Point2D.Double(robot.getX(), robot.getY());
 
 		robot.setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing - robot.getRadarHeadingRadians()) * 2);
 
 		_surfDirections.add(0, new Integer((lateralVelocity >= 0) ? 1 : -1));
 		_surfAbsBearings.add(0, new Double(absBearing + Math.PI));
-		// TODO: apply the fuzzy logic to get the bullet power
-		double bulletPower = enemyEnergy - enemyEvent.getEnergy();
 		if (bulletPower < 3.01 && bulletPower > 0.09 && _surfDirections.size() > 2) {
 			EnemyWave ew = new EnemyWave();
 			ew.fireTime = robot.getTime() - 1;
 			ew.bulletVelocity = EnemyWave.bulletVelocity(bulletPower);
 			ew.distanceTraveled = EnemyWave.bulletVelocity(bulletPower);
-			ew.direction = ((Integer) _surfDirections.get(2)).intValue();
-			ew.directAngle = ((Double) _surfAbsBearings.get(2)).doubleValue();
+			ew.direction = _surfDirections.get(2).intValue();
+			ew.directAngle = _surfAbsBearings.get(2).doubleValue();
 			ew.fireLocation = (Point2D.Double) _enemyLocation.clone(); // last tick
 			_enemyWaves.add(ew);
 		}
 		enemyEnergy = enemyEvent.getEnergy();
-		_enemyLocation = EnemyWave.project(_myLocation, absBearing, enemyEvent.getDistance());
+		_enemyLocation = EnemyWave.project(_myLocation, absBearing, enemyDistance);
+		if (movementBlock != null) {
+			loadFuzzyVariables(bulletPower, absBearing, enemyDistance, lateralVelocity);
+		}
 		updateWaves();
 		doSurfing();
 
@@ -101,7 +106,7 @@ public class MovementController {
 	private void updateWaves() {
 		final int EXTRA_SPACE = 50;
 		for (int x = 0; x < _enemyWaves.size(); x++) {
-			EnemyWave ew = (EnemyWave) _enemyWaves.get(x);
+			EnemyWave ew = _enemyWaves.get(x);
 			ew.distanceTraveled = (robot.getTime() - ew.fireTime) * ew.bulletVelocity;
 			if (ew.distanceTraveled > _myLocation.distance(ew.fireLocation) + EXTRA_SPACE) {
 				_enemyWaves.remove(x);
@@ -116,8 +121,8 @@ public class MovementController {
 			EnemyWave hitWave = null;
 
 			// look through the EnemyWaves, and find one that could've hit us.
-			for (int x = 0; x < _enemyWaves.size(); x++) {
-				EnemyWave ew = (EnemyWave) _enemyWaves.get(x);
+			for (EnemyWave element : _enemyWaves) {
+				EnemyWave ew = element;
 
 				if (Math.abs(ew.distanceTraveled - _myLocation.distance(ew.fireLocation)) < 50
 						&& Math.abs(EnemyWave.bulletVelocity(bulletPower) - ew.bulletVelocity) < 0.001) {
@@ -142,14 +147,11 @@ public class MovementController {
 			return;
 		}
 
-		double dangerLeft = checkDanger(surfWave, -1);
-		double dangerRight = checkDanger(surfWave, 1);
-
-		double goAngle = EnemyWave.absoluteBearing(surfWave.fireLocation, _myLocation);
-		if (dangerLeft < dangerRight) {
-			goAngle = EnemyWave.wallSmoothing(_myLocation, goAngle - (Math.PI / 2), -1, WALL_STICK);
+		double goAngle;
+		if (movementBlock != null) {
+			goAngle = parseEscapeAngle();
 		} else {
-			goAngle = EnemyWave.wallSmoothing(_myLocation, goAngle + (Math.PI / 2), 1, WALL_STICK);
+			goAngle = parseEscapeAngle(surfWave);
 		}
 
 		setBackAsFront(goAngle);
@@ -207,8 +209,8 @@ public class MovementController {
 		double closestDistance = 50000; // I juse use some very big number here
 		EnemyWave surfWave = null;
 
-		for (int x = 0; x < _enemyWaves.size(); x++) {
-			EnemyWave ew = (EnemyWave) _enemyWaves.get(x);
+		for (EnemyWave element : _enemyWaves) {
+			EnemyWave ew = element;
 			double distance = _myLocation.distance(ew.fireLocation) - ew.distanceTraveled;
 
 			if (distance > ew.bulletVelocity && distance < closestDistance) {
@@ -246,10 +248,39 @@ public class MovementController {
 		}
 	}
 
+	/**
+	 * lateral_velocity : REAL; // Lateral velocity of the enemy robot abs_bearing :
+	 * REAL; // Absolute bearing of the enemy robot bullet_power : REAL; // Power of
+	 * the enemy bullet distance : REAL; // Distance between our bot and enemy bot
+	 */
+
+	private void loadFuzzyVariables(Double enemyBulletPower, Double enemyAbsBearing, Double distance,
+			Double lateralVelocity) {
+		movementBlock.setVariable("lateral_velocity", lateralVelocity);
+		movementBlock.setVariable("distance", distance);
+		movementBlock.setVariable("abs_bearing", enemyAbsBearing);
+		movementBlock.setVariable("bullet_power", enemyBulletPower);
+	}
+
+	private double parseEscapeAngle(EnemyWave surfWave) {
+		double dangerLeft = checkDanger(surfWave, -1);
+		double dangerRight = checkDanger(surfWave, 1);
+		Double goAngle = EnemyWave.absoluteBearing(surfWave.fireLocation, _myLocation);
+		if (dangerLeft < dangerRight) {
+			return EnemyWave.wallSmoothing(_myLocation, goAngle - (Math.PI / 2), -1, WALL_STICK);
+		}
+		return EnemyWave.wallSmoothing(_myLocation, goAngle + (Math.PI / 2), 1, WALL_STICK);
+
+	}
+
+	private double parseEscapeAngle() {
+		return movementBlock.getVariable("go_angle").getValue();
+	}
+
 	public void paint(Graphics2D g) {
 		g.setColor(java.awt.Color.red);
-		for (int i = 0; i < _enemyWaves.size(); i++) {
-			EnemyWave w = (EnemyWave) (_enemyWaves.get(i));
+		for (EnemyWave element : _enemyWaves) {
+			EnemyWave w = (element);
 			Point2D.Double center = w.fireLocation;
 
 			// int radius = (int)(w.distanceTraveled + w.bulletVelocity);

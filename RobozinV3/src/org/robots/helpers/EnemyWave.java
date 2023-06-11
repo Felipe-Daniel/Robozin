@@ -4,15 +4,15 @@ package org.robots.helpers;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-public class EnemyWave { 
+public class EnemyWave {
 	public double fireTime;
 	public double bulletVelocity;
 	public double distanceTraveled;
 	public double direction;
 	public double directAngle;
 	public Point2D.Double fireLocation;
-	
-	
+
+
 	public static double wallSmoothing(Point2D.Double botLocation, double angle, int orientation, double wallStick) {
 		Rectangle2D.Double _fieldRect = new java.awt.geom.Rectangle2D.Double(18, 18, 764, 564);
 		while (!_fieldRect.contains(project(botLocation, angle, wallStick))) {
@@ -42,5 +42,5 @@ public class EnemyWave {
 		return Math.asin(8.0 / velocity);
 	}
 
-	
+
 }

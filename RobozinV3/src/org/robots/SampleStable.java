@@ -11,10 +11,10 @@ import robocode.HitByBulletEvent;
 import robocode.ScannedRobotEvent;
 
 public class SampleStable extends AdvancedRobot{
-	
-	private BulletController bulletController; 
+
+	private BulletController bulletController;
 	private MovementController movementController;
-	
+
 	@Override
 	public void run() {
 		bulletController = new BulletController(this);
@@ -25,26 +25,26 @@ public class SampleStable extends AdvancedRobot{
 		do {
 			 turnRadarRightRadians(Double.POSITIVE_INFINITY);
 		}while(true);
-		
+
 	}
-	
+
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		// TODO Auto-generated method stub
 		this.movementController.execute(event);
 		this.bulletController.execute(event);
 	}
-	
+
 	@Override
 	public void onHitByBullet(HitByBulletEvent event) {
 		this.movementController.collectData(event);
 	}
-	
+
 	@Override
 	public void onBulletHitBullet(BulletHitBulletEvent event) {
 		this.movementController.collectData(event);
 	}
-	
+
 	@Override
 	public void onPaint(Graphics2D g) {
 		movementController.paint(g);

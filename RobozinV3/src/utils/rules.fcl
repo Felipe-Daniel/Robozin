@@ -1,119 +1,111 @@
-FUNCTION_BLOCK movement_controller
+FUNCTION_BLOCK BulletControllerRules
+VAR_INPUT
+    accuracy_percentage : REAL; // Fuzzified input variable
+    my_energy : REAL; // Fuzzified input variable
+    enemy_energy : REAL; // Fuzzified input variable
+    enemy_distance : REAL; // Fuzzified input variable
+END_VAR
 
-	VAR_INPUT
-		accuracy_percentage: REAL;
-		enemy_distance: REAL;
-		enemy_energy: REAL;
-		my_energy: REAL;
-	END_VAR
-	
-	VAR_OUTPUT
-		bullet_power: REAL;
-	END_VAR
-	
-	FUZZIFY enemy_distance
-		TERM low := trape 0 0 150 300; 
-		TERM mid := trape 175 250 450 600;
-		TERM high := trape 475 550 2000 2000;
-	END_FUZZIFY
-	
-	FUZZIFY my_energy
-		TERM low := trape 0 0 20 40;
-		TERM mid := trape 25 40 60 70;
-		TERM high := trape 60 70 200 200;
-	END_FUZZIFY
-	
-	
-	FUZZIFY enemy_energy
-		TERM low := trape 0 0 20 40;
-		TERM mid := trape 25 40 60 70;
-		TERM high := trape 60 70 200 200;
-	END_FUZZIFY
-	
-	FUZZIFY accuracy_percentage
-	 	TERM low := trian 0.1 0.3 0.55;
-	 	TERM mid := trian 0.56 0.7 0.8;
-		TERM high := trian 0.8 0.9 1;
-	END_FUZZIFY
+VAR_OUTPUT
+    bullet_power : REAL; // Fuzzified output variable
+END_VAR
 
-	DEFUZZIFY bullet_power
-		TERM low :=  1;
-		TERM mid := trian 1 1.5 2;
-		TERM high := trian 2 2.5 3;
-		METHOD : COG;
-		DEFAULT := 1;
-	END_DEFUZZIFY
+FUZZIFY accuracy_percentage
+    TERM low := (0, 0) (0.1, 1) (0.2, 0);
+    TERM medium := (0.1, 0) (0.2, 1) (0.4, 0);
+    TERM high := (0.2, 0) (0.4, 1) (0.5, 0);
+END_FUZZIFY
 
-	RULEBLOCK number_one
-		AND : MIN;
-		ACT : MIN;
-		ACCU : MAX;
-		RULE 1: IF enemy_distance IS low AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS low THEN bullet_power IS low;
-		RULE 2: IF enemy_distance IS low AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS mid THEN bullet_power IS low;
-		RULE 3: IF enemy_distance IS low AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS high THEN bullet_power IS low;
-		RULE 4: IF enemy_distance IS mid AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS low THEN bullet_power IS low;
-		RULE 5: IF enemy_distance IS mid AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS mid THEN bullet_power IS low;
-		RULE 6: IF enemy_distance IS mid AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS high THEN bullet_power IS mid;
-		RULE 7: IF enemy_distance IS high AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS low THEN bullet_power IS low;
-		RULE 8: IF enemy_distance IS high AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS mid THEN bullet_power IS mid;
-		RULE 9: IF enemy_distance IS high AND enemy_energy IS low AND my_energy IS low AND accuracy_percentage IS high THEN bullet_power IS mid;
-		RULE 10: IF enemy_distance IS low AND enemy_energy IS mid AND my_energy IS low AND accuracy_percentage IS low THEN bullet_power IS low;
-		RULE 11: IF enemy_distance IS low AND enemy_energy IS mid AND my_energy IS low AND accuracy_percentage IS mid THEN bullet_power IS mid;
-		RULE 12: IF enemy_distance IS low AND enemy_energy IS mid AND my_energy IS low AND accuracy_percentage IS high THEN bullet_power IS mid;	
-	END_RULEBLOCK
+FUZZIFY my_energy
+    TERM low := (0, 0) (20, 1) (30, 0);
+    TERM medium := (20, 0) (30, 1) (50, 0);
+    TERM high := (30, 0) (50, 1) (100, 0);
+END_FUZZIFY
+
+FUZZIFY enemy_energy
+    TERM low := (0, 0) (10, 1) (20, 0);
+    TERM medium := (10, 0) (20, 1) (30, 0);
+    TERM high := (20, 0) (30, 1) (100, 0);
+END_FUZZIFY
+
+FUZZIFY enemy_distance
+    TERM close := (0, 0) (100, 1) (200, 0);
+    TERM medium := (100, 0) (200, 1) (400, 0);
+    TERM far := (200, 0) (400, 1) (1000, 0);
+END_FUZZIFY
+
+DEFUZZIFY bullet_power
+    TERM low := (0, 0) (1, 1) (2, 0);
+    TERM medium := (1, 0) (2, 1) (3, 0);
+    TERM high := (2, 0) (3, 1) (5, 0);
+END_DEFUZZIFY
+
+RULEBLOCK BulletPowerRules
+    AND : MIN;
+    OR : MAX;
+    ACT : MIN;
+
+    RULE 1 : IF accuracy_percentage IS high AND my_energy IS high AND enemy_energy IS high AND enemy_distance IS close THEN bullet_power IS high;
+    RULE 2 : IF accuracy_percentage IS high AND my_energy IS high AND enemy_energy IS high AND enemy_distance IS medium THEN bullet_power IS medium;
+    RULE 3 : IF accuracy_percentage IS high AND my_energy IS high AND enemy_energy IS high AND enemy_distance IS far THEN bullet_power IS low;
+
+    RULE 4 : IF accuracy_percentage IS high AND my_energy IS high AND enemy_energy IS medium AND enemy_distance IS close THEN bullet_power IS high;
+    RULE 5 : IF accuracy_percentage IS high AND my_energy IS high AND enemy_energy IS medium AND enemy_distance IS medium THEN bullet_power IS medium;
+    RULE 6 : IF accuracy_percentage IS high AND my_energy IS high AND enemy_energy IS medium AND enemy_distance IS far THEN bullet_power IS low;
+
+END_RULEBLOCK
+
 END_FUNCTION_BLOCK
-FUNCTION_BLOCK bullet_controller
 
-	VAR_INPUT
-		accuracy_percentage: REAL;
-		enemy_distance: REAL;
-		enemy_energy: REAL;
-		my_energy: REAL;
-	END_VAR
-	
-	VAR_OUTPUT
-		bullet_power: REAL;
-	END_VAR
-	
-	FUZZIFY enemy_distance
-		TERM low := trape 0 0 150 300; 
-		TERM mid := trape 175 250 450 600;
-		TERM high := trape 475 550 2000 2000;
-	END_FUZZIFY
-	
-	FUZZIFY my_energy
-		TERM low := trape 0 0 20 40;
-		TERM mid := trape 25 40 60 70;
-		TERM high := trape 60 70 200 200;
-	END_FUZZIFY
-	
-	FUZZIFY enemy_energy
-		TERM low := trape 0 0 20 40;
-		TERM mid := trape 25 40 60 70;
-		TERM high := trape 60 70 200 200;
-	END_FUZZIFY
-	
-	FUZZIFY accuracy_percentage
-	 	TERM low := trian 0.1 0.3 0.55;
-	 	TERM mid := trian 0.56 0.7 0.8;
-		TERM high := trian 0.8 0.9 1;
-	END_FUZZIFY
+FUNCTION_BLOCK MovementController
 
-	DEFUZZIFY bullet_power
-		TERM low :=  trian 1 1.25 1.5;
-		TERM mid := trian 1.5 1.75 2;
-		TERM high := trian 2 2.5 3;
-		METHOD : COG;
-		DEFAULT := 1;
-	END_DEFUZZIFY
+VAR_INPUT
+    lateral_velocity : REAL; // Lateral velocity of the enemy robot
+    abs_bearing : REAL; // Absolute bearing of the enemy robot
+    bullet_power : REAL; // Power of the enemy bullet
+    distance : REAL; // Distance between our bot and enemy bot
+END_VAR
 
-	RULEBLOCK number_one
-		AND : MIN;
-		ACT : MIN;
-		ACCU : MAX;
-		RULE 1: IF enemy_distance IS low AND NOT my_energy IS low AND NOT accuracy_percentage IS low THEN bullet_power IS high;
-		RULE 2: IF NOT enemy_distance IS low AND enemy_energy IS low AND NOT my_energy IS  low AND NOT accuracy_percentage IS high THEN bullet_power IS mid;
-		RULE 3: IF enemy_distance IS low AND enemy_energy IS low AND NOT my_energy IS  low AND accuracy_percentage IS low THEN bullet_power IS high;
-		RULE 4: IF accuracy_percentage IS high THEN bullet_power IS  high;
-	END_RULEBLOCK
+VAR_OUTPUT
+    go_angle : REAL; // Desired movement angle
+END_VAR
+
+FUZZIFY lateral_velocity
+    TERM negative := (-10, 1) (-5, 1) (0, 0);
+    TERM positive := (0, 0) (5, 1) (10, 1);
+END_FUZZIFY
+
+FUZZIFY abs_bearing
+    TERM left := (-180, 1) (-90, 1) (0, 0);
+    TERM right := (0, 0) (90, 1) (180, 1);
+END_FUZZIFY
+
+FUZZIFY bullet_power
+    TERM low := (0, 1) (1, 1) (2, 0);
+    TERM high := (1, 0) (2, 1) (3, 1);
+END_FUZZIFY
+
+FUZZIFY distance
+    TERM close := (0, 1) (100, 1) (200, 0);
+    TERM far := (100, 0) (200, 1) (400, 1);
+END_FUZZIFY
+
+DEFUZZIFY go_angle
+    METHOD : COG;
+    DEFAULT := 0;
+    TERM left := (-180, 1) (-90, 1) (0, 0);
+    TERM right := (0, 0) (90, 1) (180, 1);
+END_DEFUZZIFY
+
+RULEBLOCK movement_rules
+    AND : MIN;
+    ACT : MIN;
+    ACCU : MAX;
+    RULE 1 : IF lateral_velocity IS negative AND abs_bearing IS left AND bullet_power IS low AND distance IS close THEN go_angle IS right;
+    RULE 2 : IF lateral_velocity IS positive AND abs_bearing IS right AND bullet_power IS high AND distance IS far THEN go_angle IS left;
+
+END_RULEBLOCK
+
 END_FUNCTION_BLOCK
+
+

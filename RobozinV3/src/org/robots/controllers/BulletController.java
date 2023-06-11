@@ -1,39 +1,39 @@
 package org.robots.controllers;
 
-import robocode.AdvancedRobot;
-import robocode.ScannedRobotEvent;
-import robocode.util.*;
-import java.awt.geom.*;
+import java.awt.geom.Point2D;
 
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
+import robocode.AdvancedRobot;
+import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
 /** IT USES:  */
 public class BulletController {
-	
+
 	private AdvancedRobot robot;
 	private FunctionBlock bulletControllerRules;
 	private double oldEnemyHeading;
 	public double bulletsHitted;
 	public double bulletsMissed;
 	public double accuracy;
-	
+
 	public BulletController(AdvancedRobot rb) {
 		this.robot = rb;
 	}
 
-	
+
 	public BulletController(AdvancedRobot rb, FunctionBlock bulletControllerRules) {
 		this(rb);
 		this.bulletControllerRules = bulletControllerRules;
 		bulletsHitted = 0;
 		bulletsMissed = 0;
 		accuracy = 0;
-		
+
 	}
-	
+
 	public void execute(ScannedRobotEvent enemyRobotEvent) {
-		
+
 		double bulletPower;
-		
+
 		if(bulletControllerRules == null) {
 			bulletPower = Math.min(3.0, this.robot.getEnergy());
 		} else {
@@ -44,7 +44,7 @@ public class BulletController {
 			bulletControllerRules.evaluate();
 			bulletPower = bulletControllerRules.getVariable("bullet_power").getValue();
 		}
-		
+
 		double myX = this.robot.getX();
 		double myY = this.robot.getY();
 		double absoluteBearing = this.robot.getHeadingRadians() + enemyRobotEvent.getBearingRadians();
@@ -58,7 +58,7 @@ public class BulletController {
 		double deltaTime = 0;
 		double battleFieldHeight = this.robot.getBattleFieldHeight(), battleFieldWidth = this.robot.getBattleFieldWidth();
 		double predictedX = enemyX, predictedY = enemyY;
-		while ((++deltaTime) * (20.0 - 3.0 * bulletPower) < Point2D.Double.distance(myX, myY, predictedX, predictedY)) {
+		while ((++deltaTime) * (20.0 - 3.0 * bulletPower) < Point2D.distance(myX, myY, predictedX, predictedY)) {
 			predictedX += Math.sin(enemyHeading) * enemyVelocity;
 			predictedY += Math.cos(enemyHeading) * enemyVelocity;
 			enemyHeading += enemyHeadingChange;
@@ -78,6 +78,7 @@ public class BulletController {
 		setAccuracy();
 
 	}
+	
 	private void setAccuracy () {
 		accuracy = bulletsHitted/(bulletsHitted+bulletsMissed);
 	}

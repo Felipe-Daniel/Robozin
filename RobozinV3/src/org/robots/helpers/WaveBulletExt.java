@@ -1,6 +1,7 @@
 package org.robots.helpers;
 
-import java.awt.geom.*;
+import java.awt.geom.Point2D;
+
 import robocode.util.Utils;
 
 
