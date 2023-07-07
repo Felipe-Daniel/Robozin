@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/out" />
+    <output-test url="file://$MODULE_DIR$/out/test/Robozin" />
+    <javadoc-paths>
+      <root url="file://$MODULE_DIR$/robocode/javadoc" />
+    </javadoc-paths>
+    <content url="file://$MODULE_DIR$/RobozinV3/src">
+      <sourceFolder url="file://$MODULE_DIR$/RobozinV3/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/RobozinV3/src/utils" type="java-resource" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" exported="" name="jFuzzyLogic" level="project" />
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/robocode/libs/robocode.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" exported="" name="robocode" level="project" />
+  </component>
+</module>

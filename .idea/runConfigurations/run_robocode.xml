@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="run_robocode" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="robocode.Robocode" />
+    <module name="Robozin" />
+    <option name="VM_PARAMETERS" value="-DNOSECURITY=true -Xmx512M -cp libs/*" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

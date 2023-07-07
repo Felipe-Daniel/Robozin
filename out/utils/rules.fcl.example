@@ -1,0 +1,40 @@
+FUNCTION_BLOCK fire_power_behaviour    // Início do bloco de definições
+    
+  VAR_INPUT               // Definição das variáveis de entrada
+      enemy_distance: REAL;
+  END_VAR
+
+  VAR_OUTPUT              // Definição das variáveis de saída
+      fire_power: REAL;
+  END_VAR
+
+  FUZZIFY fire_power_behaviour      
+      // definição das partições fuzzy e seus intervalos para cada variável de entrada
+	TERM nearest := (0.0, 0) (
+  	TERM near := (0.0, 0) (10.0, 1) (20.0, 0)
+ 	TERM far := (0.0, 0) (10.0, 1) (20.0, 0))
+  END_FUZZIFY
+
+  DEFUZZIFY fire_power
+      // definição das partições fuzzy e seus intervalos para cada variável de saída
+       
+      TERM PARTICAO_Y := (0.0, 0) (50.0, 1) (100.0, 0) ;
+      METHOD : 	COG;  // Método de defuzzificação (Padrão é o Centro de Gravidade)
+      DEFAULT := 0;  // Valor default caso nenhuma regra seja ativada
+  END_DEFUZZIFY
+
+  RULEBLOCK 
+      // Definição do conjunto de regras para o controlador Fuzzy. Este bloco irá descrever
+      // as correlações entre as partições da variável de entrada com uma partição da variável
+      // de saída
+       
+      AND : MIN;  // Método MIN utilizado no processamento do operador lógico AND
+      ACT : MIN;  // Método de ativação
+      ACCU : MAX; // método de acumulação
+
+      // Início da descrição de cada regra
+      // RULE 1 : IF variavel_entrada1 IS PARTICAO1 AND variavel_entrada1 IS particao2  THEN variavel_saida IS particaoX;
+
+  END_RULEBLOCK
+    
+  END_FUNCTION_BLOCK
