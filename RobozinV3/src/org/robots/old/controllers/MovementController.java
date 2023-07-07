@@ -1,4 +1,4 @@
-package org.robots.controllers;
+package org.robots.old.controllers;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -15,12 +15,11 @@ import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
 
 public class MovementController {
-	// TODO: maybe apply singleton
-	private AdvancedRobot robot;
+	private final AdvancedRobot robot;
 	private FunctionBlock movementBlock;
 	private final double WALL_STICK = 160;
 	public static int BINS = 47;
-	public static double _surfStats[] = new double[BINS];
+	public static double[] _surfStats = new double[BINS];
 	public Point2D.Double _myLocation; // our bot's location
 	public Point2D.Double _enemyLocation; // enemy bot's location
 	public double enemyEnergy;
@@ -81,15 +80,15 @@ public class MovementController {
 
 		robot.setTurnRadarRightRadians(Utils.normalRelativeAngle(absBearing - robot.getRadarHeadingRadians()) * 2);
 
-		_surfDirections.add(0, new Integer((lateralVelocity >= 0) ? 1 : -1));
-		_surfAbsBearings.add(0, new Double(absBearing + Math.PI));
+		_surfDirections.add(0, (lateralVelocity >= 0) ? 1 : -1);
+		_surfAbsBearings.add(0, absBearing + Math.PI);
 		if (bulletPower < 3.01 && bulletPower > 0.09 && _surfDirections.size() > 2) {
 			EnemyWave ew = new EnemyWave();
 			ew.fireTime = robot.getTime() - 1;
 			ew.bulletVelocity = EnemyWave.bulletVelocity(bulletPower);
 			ew.distanceTraveled = EnemyWave.bulletVelocity(bulletPower);
-			ew.direction = _surfDirections.get(2).intValue();
-			ew.directAngle = _surfAbsBearings.get(2).doubleValue();
+			ew.direction = _surfDirections.get(2);
+			ew.directAngle = _surfAbsBearings.get(2);
 			ew.fireLocation = (Point2D.Double) _enemyLocation.clone(); // last tick
 			_enemyWaves.add(ew);
 		}
@@ -122,11 +121,10 @@ public class MovementController {
 
 			// look through the EnemyWaves, and find one that could've hit us.
 			for (EnemyWave element : _enemyWaves) {
-				EnemyWave ew = element;
 
-				if (Math.abs(ew.distanceTraveled - _myLocation.distance(ew.fireLocation)) < 50
-						&& Math.abs(EnemyWave.bulletVelocity(bulletPower) - ew.bulletVelocity) < 0.001) {
-					hitWave = ew;
+				if (Math.abs(element.distanceTraveled - _myLocation.distance(element.fireLocation)) < 50
+						&& Math.abs(EnemyWave.bulletVelocity(bulletPower) - element.bulletVelocity) < 0.001) {
+					hitWave = element;
 					break;
 				}
 			}
@@ -210,11 +208,10 @@ public class MovementController {
 		EnemyWave surfWave = null;
 
 		for (EnemyWave element : _enemyWaves) {
-			EnemyWave ew = element;
-			double distance = _myLocation.distance(ew.fireLocation) - ew.distanceTraveled;
+			double distance = _myLocation.distance(element.fireLocation) - element.distanceTraveled;
 
-			if (distance > ew.bulletVelocity && distance < closestDistance) {
-				surfWave = ew;
+			if (distance > element.bulletVelocity && distance < closestDistance) {
+				surfWave = element;
 				closestDistance = distance;
 			}
 		}
@@ -234,7 +231,7 @@ public class MovementController {
 		double factor = Utils.normalRelativeAngle(offsetAngle) / EnemyWave.maxEscapeAngle(ew.bulletVelocity)
 				* ew.direction;
 
-		return (int) EnemyWave.limit(0, (factor * ((BINS - 1) / 2)) + ((BINS - 1) / 2), BINS - 1);
+		return (int) EnemyWave.limit(0, (factor * ((double) (BINS - 1) / 2)) + ((double) (BINS - 1) / 2), BINS - 1);
 	}
 
 	public void logHit(EnemyWave ew, Point2D.Double targetLocation) {
@@ -265,7 +262,7 @@ public class MovementController {
 	private double parseEscapeAngle(EnemyWave surfWave) {
 		double dangerLeft = checkDanger(surfWave, -1);
 		double dangerRight = checkDanger(surfWave, 1);
-		Double goAngle = EnemyWave.absoluteBearing(surfWave.fireLocation, _myLocation);
+		double goAngle = EnemyWave.absoluteBearing(surfWave.fireLocation, _myLocation);
 		if (dangerLeft < dangerRight) {
 			return EnemyWave.wallSmoothing(_myLocation, goAngle - (Math.PI / 2), -1, WALL_STICK);
 		}
@@ -280,8 +277,7 @@ public class MovementController {
 	public void paint(Graphics2D g) {
 		g.setColor(java.awt.Color.red);
 		for (EnemyWave element : _enemyWaves) {
-			EnemyWave w = (element);
-			Point2D.Double center = w.fireLocation;
+			Point2D.Double center = (element).fireLocation;
 
 			// int radius = (int)(w.distanceTraveled + w.bulletVelocity);
 			// hack to make waves line up visually, due to execution sequence in robocode
@@ -290,7 +286,7 @@ public class MovementController {
 			// onScannedRobot())
 			// NB! above hack is now only necessary for robocode versions before 1.4.2
 			// otherwise use:s
-			int radius = (int) w.distanceTraveled;
+			int radius = (int) (element).distanceTraveled;
 
 			// Point2D.Double center = w.fireLocation;
 			if (radius - 40 < center.distance(_myLocation))

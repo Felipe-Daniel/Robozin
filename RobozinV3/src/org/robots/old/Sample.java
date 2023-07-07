@@ -1,6 +1,6 @@
-package org.robots;
-import org.robots.controllers.BulletController;
-import org.robots.controllers.MovementController;
+package org.robots.old;
+import org.robots.old.controllers.BulletController;
+import org.robots.old.controllers.MovementController;
 import net.sourceforge.jFuzzyLogic.FIS;
 import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import robocode.AdvancedRobot;
@@ -13,9 +13,6 @@ import robocode.ScannedRobotEvent;
 import robocode.control.events.TurnEndedEvent;
 
 
-//import net.sourceforge.jFuzzyLogic.plot.JFuzzyChart;
-
-/** WIP: THE ROBOT WHERE WE WILL PUT THE FUZZY LOGIG INTO THE CONTROLLERS */
 public class Sample extends AdvancedRobot{
 
 	private FIS fis;

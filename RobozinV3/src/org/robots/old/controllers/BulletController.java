@@ -1,4 +1,4 @@
-package org.robots.controllers;
+package org.robots.old.controllers;
 
 import java.awt.geom.Point2D;
 
@@ -6,10 +6,10 @@ import net.sourceforge.jFuzzyLogic.FunctionBlock;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 import robocode.util.Utils;
-/** IT USES:  */
-public class BulletController {
 
-	private AdvancedRobot robot;
+public class BulletController  {
+
+	private final AdvancedRobot robot;
 	private FunctionBlock bulletControllerRules;
 	private double oldEnemyHeading;
 	public double bulletsHitted;
@@ -82,4 +82,5 @@ public class BulletController {
 	private void setAccuracy () {
 		accuracy = bulletsHitted/(bulletsHitted+bulletsMissed);
 	}
+
 }

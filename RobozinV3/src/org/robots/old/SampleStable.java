@@ -1,9 +1,9 @@
-package org.robots;
+package org.robots.old;
 
 import java.awt.Graphics2D;
 
-import org.robots.controllers.BulletController;
-import org.robots.controllers.MovementController;
+import org.robots.old.controllers.BulletController;
+import org.robots.old.controllers.MovementController;
 
 import robocode.AdvancedRobot;
 import robocode.BulletHitBulletEvent;
