@@ -15,7 +15,7 @@ public class Robozin extends AdvancedRobot {
     private RadarController radarController;
 
     public void run() {
-        String path = "logs/";
+        String path = "C:\\Users\\loyol\\IdeaProjects\\Robozin\\RobozinV3\\src\\logs\\";
         this.movementController = new MovementController(this, path);
         this.gunController = new GunController(this, path);
         this.radarController = new RadarController(this);

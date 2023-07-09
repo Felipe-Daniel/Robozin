@@ -1,16 +1,16 @@
 package org.robots.helpers;
 
 import robocode.AdvancedRobot;
+import robocode.RobocodeFileWriter;
 
 import java.io.FileWriter;
 
 public class Logger {
-    private FileWriter fileWriter;
+    private RobocodeFileWriter fileWriter;
 
     public Logger(String path, String header) {
         try {
-            String timesStamp = String.valueOf(System.currentTimeMillis());
-            fileWriter = new FileWriter(path + timesStamp + ".csv");
+            fileWriter = new RobocodeFileWriter(path.concat(".data"));
             fileWriter.append(header);
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());

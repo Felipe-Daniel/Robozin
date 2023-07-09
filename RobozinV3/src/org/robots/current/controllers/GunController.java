@@ -62,7 +62,7 @@ public class GunController {
                 BATTLE_FIELD_WIDTH - WALL_MARGIN * 2, BATTLE_FIELD_HEIGHT - WALL_MARGIN * 2);
         double enemyDistance;
         double enemyAbsoluteBearing = this.robot.getHeadingRadians() + enemyRobotEvent.getBearingRadians();
-        enemyLocation = project(wave.wGunLocation = new Point2D.Double(
+        wave.enemyLocation = project(wave.wGunLocation = new Point2D.Double(
                 this.robot.getX(),
                 this.robot.getY()),
                 enemyAbsoluteBearing,
@@ -104,6 +104,21 @@ public class GunController {
         if (this.robot.getEnergy() >= BULLET_POWER) {
             this.robot.addCustomEvent(wave);
         }
+
+        logger.log(new Object[]{
+                robot.getTime(),
+                robot.getEnergy(),
+                enemyDistance,
+                wave.wBulletPower,
+                enemyBearing,
+                enemyEnergy,
+                enemyVelocity,
+                enemyHeading,
+                enemyX,
+                enemyY,
+                enemyAcceleration,
+                enemyDeceleration
+        });
     }
 
 
