@@ -22,6 +22,5 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" exported="" name="robocode" level="project" />
   </component>
 </module>

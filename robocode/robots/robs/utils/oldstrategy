@@ -1,0 +1,155 @@
+In GuessFactor Targeting, the variables that can be fuzzified are typically related to the current situation and characteristics of the target robot. Here are some variables commonly used in GuessFactor Targeting along with their respective graphs:
+
+1. Distance: Represents the distance between your robot and the target robot.
+
+   - Fuzzy terms: "Close," "Medium," "Far"
+   - Graph: The graph can be triangular or trapezoidal, with membership values indicating the proximity of the target.
+
+2. Lateral Velocity: Represents the lateral (sideways) velocity of the target robot.
+
+   - Fuzzy terms: "Negative," "Zero," "Positive"
+   - Graph: The graph is typically triangular, with membership values indicating the direction and speed of lateral movement.
+
+3. Acceleration: Represents the acceleration of the target robot.
+
+   - Fuzzy terms: "Negative," "Zero," "Positive"
+   - Graph: The graph is typically triangular, with membership values indicating the direction and magnitude of acceleration.
+
+4. Heading Change: Represents the change in heading of the target robot.
+
+   - Fuzzy terms: "Negative," "Zero," "Positive"
+   - Graph: The graph is typically triangular, with membership values indicating the direction and magnitude of the heading change.
+
+5. Time Since Last Deceleration: Represents the time elapsed since the target robot last decelerated.
+
+   - Fuzzy terms: "Short," "Medium," "Long"
+   - Graph: The graph can be triangular or trapezoidal, with membership values indicating the recency of deceleration.
+
+6. Bullet Hit Ratio: Represents the ratio of successful bullet hits to total shots fired.
+
+   - Fuzzy terms: "Low," "Medium," "High"
+   - Graph: The graph can be triangular or trapezoidal, with membership values indicating the accuracy of your shots.
+
+These variables can be fuzzified using appropriate membership functions to convert crisp input values into fuzzy sets. The membership functions define the shape of the fuzzy sets and the degree of membership for each input value.
+
+Note that the choice of variables and their fuzzyfication depends on the specific implementation and strategy of your GuessFactor Targeting algorithm. The variables mentioned above are common examples, but you can customize and extend them based on your requirements and observations in the battle.
+
+#####
+
+Certainly! Here's an example of an .fcl (Fuzzy Control Language) file for GuessFactor Targeting using the variables mentioned earlier:
+
+```
+FUNCTION_BLOCK GuessFactorTargeting
+
+VAR_INPUT
+    distance: REAL;
+    lateral_velocity: REAL;
+    acceleration: REAL;
+    heading_change: REAL;
+    time_since_deceleration: REAL;
+    bullet_hit_ratio: REAL;
+END_VAR
+
+VAR_OUTPUT
+    guess_factor: REAL;
+END_VAR
+
+FUZZIFY distance
+    TERM close := trape 0 0 100 200;
+    TERM medium := trian 150 300 450;
+    TERM far := trape 400 500 2000 2000;
+END_FUZZIFY
+
+FUZZIFY lateral_velocity
+    TERM negative := trian -5 -3 -1;
+    TERM zero := trian -2 0 2;
+    TERM positive := trian 1 3 5;
+END_FUZZIFY
+
+FUZZIFY acceleration
+    TERM negative := trian -5 -3 -1;
+    TERM zero := trian -2 0 2;
+    TERM positive := trian 1 3 5;
+END_FUZZIFY
+
+FUZZIFY heading_change
+    TERM negative := trian -5 -3 -1;
+    TERM zero := trian -2 0 2;
+    TERM positive := trian 1 3 5;
+END_FUZZIFY
+
+FUZZIFY time_since_deceleration
+    TERM short := trape 0 0 2 4;
+    TERM medium := trape 3 5 7 9;
+    TERM long := trape 8 10 200 200;
+END_FUZZIFY
+
+FUZZIFY bullet_hit_ratio
+    TERM low := trian 0 0.3 0.6;
+    TERM medium := trian 0.5 0.7 0.9;
+    TERM high := trian 0.8 0.95 1;
+END_FUZZIFY
+
+DEFUZZIFY guess_factor
+    TERM left := trian -1 -0.5 0;
+    TERM center := trian -0.5 0 0.5;
+    TERM right := trian 0 0.5 1;
+    METHOD : COG;
+    DEFAULT := 0;
+END_DEFUZZIFY
+
+RULEBLOCK guess_factor_rules
+    AND : MIN;
+    ACT : MIN;
+    ACCU : MAX;
+
+    RULE 1 : IF distance IS close AND lateral_velocity IS zero AND acceleration IS zero AND heading_change IS zero THEN guess_factor IS center;
+    RULE 2 : IF distance IS medium AND (lateral_velocity IS negative OR lateral_velocity IS positive) THEN guess_factor IS center;
+    RULE 3 : IF distance IS far AND (lateral_velocity IS negative OR lateral_velocity IS positive) THEN guess_factor IS center;
+    RULE 4 : IF distance IS close AND lateral_velocity IS zero AND acceleration IS zero AND heading_change IS negative THEN guess_factor IS left;
+    RULE 5 : IF distance IS close AND lateral_velocity IS zero AND acceleration IS zero AND heading_change IS positive THEN guess_factor IS right;
+    RULE 6 : IF bullet_hit_ratio IS low AND time_since_deceleration IS short THEN guess_factor IS left;
+    RULE 7 : IF bullet_hit_ratio IS low AND time_since_deceleration IS long THEN guess_factor IS right;
+
+END_RULEBLOCK
+
+END_FUNCTION_BLOCK
+```
+
+Please note that this is a simplified example, and you may need to adjust the fuzzy sets, membership functions, and rules based on your specific implementation and requirements.
+
+In GuessFactor Targeting, the variables that can be fuzzified are typically related to the current situation and characteristics of the target robot. Here are some variables commonly used in GuessFactor Targeting along with their respective graphs:
+
+1. Distance: Represents the distance between your robot and the target robot.
+
+   - Fuzzy terms: "Close," "Medium," "Far"
+   - Graph: The graph can be triangular or trapezoidal, with membership values indicating the proximity of the target.
+
+2. Lateral Velocity: Represents the lateral (sideways) velocity of the target robot.
+
+   - Fuzzy terms: "Negative," "Zero," "Positive"
+   - Graph: The graph is typically triangular, with membership values indicating the direction and speed of lateral movement.
+
+3. Acceleration: Represents the acceleration of the target robot.
+
+   - Fuzzy terms: "Negative," "Zero," "Positive"
+   - Graph: The graph is typically triangular, with membership values indicating the direction and magnitude of acceleration.
+
+4. Heading Change: Represents the change in heading of the target robot.
+
+   - Fuzzy terms: "Negative," "Zero," "Positive"
+   - Graph: The graph is typically triangular, with membership values indicating the direction and magnitude of the heading change.
+
+5. Time Since Last Deceleration: Represents the time elapsed since the target robot last decelerated.
+
+   - Fuzzy terms: "Short," "Medium," "Long"
+   - Graph: The graph can be triangular or trapezoidal, with membership values indicating the recency of deceleration.
+
+6. Bullet Hit Ratio: Represents the ratio of successful bullet hits to total shots fired.
+
+   - Fuzzy terms: "Low," "Medium," "High"
+   - Graph: The graph can be triangular or trapezoidal, with membership values indicating the accuracy of your shots.
+
+These variables can be fuzzified using appropriate membership functions to convert crisp input values into fuzzy sets. The membership functions define the shape of the fuzzy sets and the degree of membership for each input value.
+
+Note that the choice of variables and their fuzzyfication depends on the specific implementation and strategy of your GuessFactor Targeting algorithm. The variables mentioned above are common examples, but you can customize and extend them based on your requirements and observations in the battle.

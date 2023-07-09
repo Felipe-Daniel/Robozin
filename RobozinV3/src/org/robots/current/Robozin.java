@@ -2,6 +2,7 @@ package org.robots.current;
 
 import org.robots.current.controllers.GunController;
 import org.robots.current.controllers.MovementController;
+import org.robots.current.controllers.RadarController;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 
@@ -9,17 +10,26 @@ public class Robozin extends AdvancedRobot {
 
     // TODO: Implement Encog usage
     // TODO: Implement Neural Network
-    private final MovementController movementController;
-    private final GunController gunController;
+    private MovementController movementController;
+    private GunController gunController;
+    private RadarController radarController;
 
-    public Robozin() {
+    public void run() {
         String path = "logs/";
         this.movementController = new MovementController(this, path);
         this.gunController = new GunController(this, path);
+        this.radarController = new RadarController(this);
+        setAdjustRadarForGunTurn(true);
+        setAdjustGunForRobotTurn(true);
+        turnRadarRightRadians(Double.POSITIVE_INFINITY);
+        do {
+            scan();
+        } while (true);
     }
 
     @Override
     public void onScannedRobot(ScannedRobotEvent e) {
+        radarController.execute(e);
         gunController.execute(e);
         movementController.execute(e);
     }
