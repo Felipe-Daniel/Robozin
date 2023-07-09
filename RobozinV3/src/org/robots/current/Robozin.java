@@ -1,9 +1,11 @@
 package org.robots.current;
 
 import org.robots.current.controllers.GunController;
-import org.robots.current.controllers.MovementController;
+import org.robots.old.controllers.MovementController;
 import org.robots.current.controllers.RadarController;
 import robocode.AdvancedRobot;
+import robocode.BulletHitEvent;
+import robocode.RoundEndedEvent;
 import robocode.ScannedRobotEvent;
 
 public class Robozin extends AdvancedRobot {
@@ -16,14 +18,13 @@ public class Robozin extends AdvancedRobot {
 
     public void run() {
         String path = "C:\\Users\\loyol\\IdeaProjects\\Robozin\\RobozinV3\\src\\logs\\";
-        this.movementController = new MovementController(this, path);
+        this.movementController = new MovementController(this);
         this.gunController = new GunController(this, path);
         this.radarController = new RadarController(this);
         setAdjustRadarForGunTurn(true);
         setAdjustGunForRobotTurn(true);
-        turnRadarRightRadians(Double.POSITIVE_INFINITY);
         do {
-            scan();
+            turnRadarRightRadians(Double.POSITIVE_INFINITY);
         } while (true);
     }
 
@@ -35,22 +36,25 @@ public class Robozin extends AdvancedRobot {
     }
 
     @Override
-    public void onBulletHit(robocode.BulletHitEvent event) {
-        gunController.onBulletHit(event);
+    public void onHitByBullet(robocode.HitByBulletEvent event) {
+       // movementController.onHitByBullet(event);
+        movementController.collectData(event);
     }
 
-    @Override
-    public void onBulletHitBullet(robocode.BulletHitBulletEvent event) {
-        gunController.onBulletHit(event);
-    }
-    @Override
-    public void onHitByBullet(robocode.HitByBulletEvent event) {
-        movementController.onHitByBullet(event);
+   @Override
+   public void onBulletHitBullet(robocode.BulletHitBulletEvent event) {
+       // movementController.onHitByBullet(event);
+       movementController.collectData(event);
     }
 
     @Override
     public void onBattleEnded(robocode.BattleEndedEvent event) {
         gunController.close();
-        movementController.close();
+       // movementController.close();
+    }
+
+    @Override
+    public void onBulletHit(BulletHitEvent event) {
+        gunController.bulletHit = true;
     }
 }

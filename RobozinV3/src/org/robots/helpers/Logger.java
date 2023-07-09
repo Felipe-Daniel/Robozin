@@ -8,7 +8,7 @@ import java.io.FileWriter;
 public class Logger {
     private RobocodeFileWriter fileWriter;
 
-    public Logger(String path, String header) {
+    public Logger(String path, String header)  {
         try {
             fileWriter = new RobocodeFileWriter(path.concat(".data"));
             fileWriter.append(header);
@@ -37,4 +37,14 @@ public class Logger {
             System.out.println("Error: " + e.getMessage());
         }
     }
+
+    public void save() {
+        try {
+            fileWriter.flush();
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+
 }

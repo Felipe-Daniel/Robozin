@@ -1,6 +1,5 @@
 package org.robots.current.controllers;
 
-import org.robots.current.helpers.CustomUtils;
 import org.robots.current.helpers.Wave;
 import org.robots.helpers.Logger;
 import robocode.AdvancedRobot;
@@ -17,18 +16,13 @@ public class GunController {
     private final AdvancedRobot robot;
     private final Logger logger;
 
-    private double enemyDistance;
-    private double enemyBearing;
-    private double enemyEnergy;
     private double enemyVelocity;
-    private double enemyHeading;
-    private double enemyX;
-    private double enemyY;
-    private double enemyAcceleration;
-    private Point2D enemyLocation;
-    private double enemyDeceleration;
+
     private double bearingDirection;
     private int timeSinceDeccel;
+
+    public boolean bulletHit = false;
+
     int[][][][][][] aimFactors = new int[DISTANCE_INDEXES]
             [VELOCITY_INDEXES][LAST_VELOCITY_INDEXES][DECCEL_TIME_INDEXES][WALL_INDEXES][AIM_FACTORS];
     // TODO: Implement GuessFactor Targeting
@@ -48,15 +42,15 @@ public class GunController {
                 .append("enemyHeading,")
                 .append("enemyX,")
                 .append("enemyY,")
-                .append("enemyAcceleration,")
-                .append("enemyDeceleration,")
+                .append("bulletHit")
                 .append("\n")
                 .toString();
 
         this.logger = new Logger(path.concat(BULLET_CONTROLLER_LOGS), headers);
     }
-
+    // IMPLEMENTS GUESS FACTOR TARGETING
     public void execute(ScannedRobotEvent enemyRobotEvent) {
+        int mostVisited = MIDDLE_FACTOR, i = AIM_FACTORS;
         Wave wave = new Wave(this.robot);
         Rectangle2D fieldRectangle = new Rectangle2D.Double(WALL_MARGIN, WALL_MARGIN,
                 BATTLE_FIELD_WIDTH - WALL_MARGIN * 2, BATTLE_FIELD_HEIGHT - WALL_MARGIN * 2);
@@ -83,14 +77,14 @@ public class GunController {
         int distanceIndex;
         wave.wBulletPower = Math.min(enemyRobotEvent.getEnergy() / 4,
                 (distanceIndex = (int)(enemyDistance / (MAX_DISTANCE / DISTANCE_INDEXES))) > 1 ? BULLET_POWER : MAX_BULLET_POWER);
-        //wave.wBulletPower = MAX_BULLET_POWER; // TargetingChallenge
+
 
         wave.wAimFactors = aimFactors[distanceIndex][velocityIndex][lastVelocityIndex][Math.min(5, timeSinceDeccel++ / 13)]
                 [fieldRectangle.contains(project(wave.wGunLocation, enemyAbsoluteBearing + wave.wBearingDirection * 13, enemyDistance)) ? 1 : 0];
 
         wave.wBearing = enemyAbsoluteBearing;
 
-        int mostVisited = MIDDLE_FACTOR, i = AIM_FACTORS;
+
         do  {
             if (wave.wAimFactors[--i] > wave.wAimFactors[mostVisited]) {
                 mostVisited = i;
@@ -104,60 +98,24 @@ public class GunController {
         if (this.robot.getEnergy() >= BULLET_POWER) {
             this.robot.addCustomEvent(wave);
         }
-
-        logger.log(new Object[]{
+       logger.log(new Object[]{
                 robot.getTime(),
                 robot.getEnergy(),
                 enemyDistance,
-                wave.wBulletPower,
-                enemyBearing,
-                enemyEnergy,
+                enemyAbsoluteBearing,
+                enemyRobotEvent.getEnergy(),
                 enemyVelocity,
-                enemyHeading,
-                enemyX,
-                enemyY,
-                enemyAcceleration,
-                enemyDeceleration
+                enemyRobotEvent.getHeading(),
+                wave.enemyLocation.getX(),
+                wave.enemyLocation.getY(),
         });
-    }
-
-
-    public void onBulletHit(robocode.BulletHitEvent event) {
-        logger.log(new Object[]{
-                robot.getTime(),
-                robot.getEnergy(),
-                event.getBullet().getPower(),
-                enemyDistance,
-                enemyBearing,
-                enemyEnergy,
-                enemyVelocity,
-                enemyHeading,
-                enemyX,
-                enemyY,
-                enemyAcceleration,
-                enemyDeceleration
-        });
-    }
-
-    public void onBulletHit(robocode.BulletHitBulletEvent event) {
-        logger.log(
-            new Object[]{
-                    robot.getTime(),
-                    robot.getEnergy(),
-                    event.getBullet().getPower(),
-                    enemyDistance,
-                    enemyBearing,
-                    enemyEnergy,
-                    enemyVelocity,
-                    enemyHeading,
-                    enemyX,
-                    enemyY,
-                    enemyAcceleration,
-                    enemyDeceleration
-        });
+        if(bulletHit)
+            bulletHit = false;
     }
 
     public void close() {
         logger.close();
     }
+
+
 }

@@ -11,11 +11,11 @@ public class RadarController {
     }
 
     public void execute(ScannedRobotEvent se) {
-        final double factor = 2.0;
+
         double radarTurn = robot.getHeadingRadians()
             + se.getBearingRadians()
             - robot.getRadarHeadingRadians();
-        robot.setTurnRadarRightRadians(factor * Utils.normalRelativeAngle(radarTurn));
+        robot.setTurnRadarRightRadians(1.9 * Utils.normalRelativeAngle(radarTurn));
     }
 
 
